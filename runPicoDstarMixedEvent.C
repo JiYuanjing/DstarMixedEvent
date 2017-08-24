@@ -1,0 +1,1 @@
+/global/project/projectdirs/star/pwg/starhf/jiyj/mixed/mixedDstar/Dstar/StRoot/macros/runPicoDstarMixedEvent.C
