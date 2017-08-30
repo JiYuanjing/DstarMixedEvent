@@ -38,11 +38,10 @@ void runPicoDstarMixedEvent(TString d0list, TString outFileName, TString badRunL
   StPicoDstMaker* picoDstMaker = new StPicoDstMaker(0, "correspondingPico.list", "picoDstMaker");
   StRefMultCorr* grefmultCorrUtil  = CentralityMaker::instance()->getgRefMultCorr_P16id();
   // StEventPlane*  eventPlaneMaker = new StEventPlane("eventPlaneMaker",picoDstMaker,grefmultCorrUtil);
-  // StPicoD0AnaMaker*  picoD0AnaMaker = new StPicoD0AnaMaker("picoD0AnaMaker", d0list, outFileName.Data(), picoDstMaker, grefmultCorrUtil, eventPlaneMaker);
   StPicoDstarMixedMaker*  picoDstarMixedMaker = new StPicoDstarMixedMaker("picoDstarMixedMaker", d0list, outFileName.Data(), picoDstMaker, grefmultCorrUtil);
-  picoDstarMixedMaker->fillQaHistograms(false);
+  picoDstarMixedMaker->fillQaHistograms(false); //D0 Qa
   picoDstarMixedMaker->addmixedevent(false);
-//   picoD0AnaMaker->fillQaHistograms(true);
+  picoDstarMixedMaker->fillSoftPionEff(true);
   grefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
   grefmultCorrUtil->readScaleForWeight("StRoot/StRefMultCorr/macros/weight_grefmult_vpd30_vpd5_Run14_P16id.txt");
 
