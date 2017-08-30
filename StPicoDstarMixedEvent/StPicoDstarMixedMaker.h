@@ -44,7 +44,9 @@ public:
     void addmixedevent(bool b=true){
         mMixedEvent = b;
     }
-
+    void fillSoftPionEff(bool b = true ){
+        mFillSoftPionEff = b;
+    }
 private:
 
     StPicoDstarMixedMaker() {}
@@ -55,7 +57,7 @@ private:
     bool isGoodEvent(StPicoEvent const*, StThreeVectorF const& vtx) const;
     bool isGoodQaTrack(StPicoTrack const* ,StThreeVectorF const& momentum ,double dca) const;
     bool isGoodTrack(StPicoTrack const*, StThreeVectorF const&) const;
-    bool isGoodSoftPionTrack(StPicoTrack const*, StThreeVectorF const&) const;
+    bool isGoodSoftPionTrack(StPicoTrack const* const trk, StThreeVectorF const& mom, float spDca) const;
     bool isTpcPion(StPicoTrack const*) const;
     bool isTpcKaon(StPicoTrack const*) const;
     bool isTpcProton(StPicoTrack const*) const;
@@ -77,7 +79,7 @@ private:
     int mEventCounter;
     bool mFillQaHists;
     bool mFillBackgroundTrees;  
-
+    bool mFillSoftPionEff;
    // -------------- USER variables -------------------------
    // add your member variables here. 
    // Remember that ntuples size can be really big, use histograms where appropriate 

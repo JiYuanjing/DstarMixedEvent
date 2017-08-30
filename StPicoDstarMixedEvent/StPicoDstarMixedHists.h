@@ -38,6 +38,7 @@ class StPicoDstarMixedHists
    void addKaonPion(StKaonPion const*, bool unlike, bool tpc, bool tof, int centrality, const double reweight);
    //
 //   void addD0Pion(StD0Pion const*, bool unlike, bool tpc, bool tof, int centrality, const double reweight);
+void addSoftPionEff(StThreeVectorF const& spMom,float spdca, bool tpc,bool tof, int centrality, const double reweight);
 void addD0SoftPion(StD0Pion const* const d0p, StKaonPion const* const kp, bool unlike,  int centrality, const double reweight);
 void addSideBandBackground(StD0Pion const* const d0p, StKaonPion const* const k,bool unlike, int centrality, const double reweight);
 void addMixedEventBackground(StMixedD0Pion const & mixD0Pion,bool unlike, int centrality,const double reweight);
@@ -47,7 +48,7 @@ void addMixedEventBackground(StMixedD0Pion const & mixD0Pion,bool unlike, int ce
    void addHFTNumer1(bool IsPion, bool IsKaon, bool IsProton, float pt, int centrality, float Eta, float Phi, float Vz, float ZdcX);
    void addQaNtuple(int, float, float, float, float, float, int, const double, float, int, int);
    void addDcaPtCent(float dca, float dcaXy, float  dcaZ, bool IsPion, bool IsKaon, bool IsProton, float pt,  int centrality, float Eta, float Phi, float Vz, float ZdcX);
-   void addeventsinbuffer(int vzbin,int centrality,int size);
+   void addeventsinbuffer(const int vzbin,const int centrality,const int size);
    int getEtaIndexDca(float Eta) ;
    int getPhiIndexDca(float Phi) ;
    int getVzIndexDca(float Vz) ;
@@ -133,6 +134,9 @@ private:
    TH3F* mh3InvariantMassVsPtVsCentLikeDstar;
    TH2F* mh2InvariantMassVsPtDstarD0;
    TH2F* mh2InvariantMassVsPtSBD0;
+   TH3F* mh3SoftPionDcaVsPtVsCent;
+   TH2F* mh2SoftPionVsPtVsCentTPC;
+   TH2F* mh2SoftPionVsPtVsCentTof;
 //Dstar mixed event 
    TH2F* mh2InvariantMassVsPtDstarMixed;
    TH3F* mh3InvariantMassVsPtVsCentDstarMixed;

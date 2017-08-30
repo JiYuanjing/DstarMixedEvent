@@ -44,7 +44,7 @@ ClassImp(StPicoDstarMixedMaker)
 StPicoDstarMixedMaker::StPicoDstarMixedMaker(char const * name, TString const inputFilesList, TString const outFileBaseName, StPicoDstMaker* picoDstMaker, StRefMultCorr* grefmultCorrUtil):
    StMaker(name), mPicoDstMaker(picoDstMaker), mPicoD0Event(NULL), mGRefMultCorrUtil(grefmultCorrUtil),
    mInputFilesList(inputFilesList), mOutFileBaseName(outFileBaseName),
-   mChain(NULL), mEventCounter(0), mFillQaHists(false), mFillBackgroundTrees(false), mHists(NULL),mMixedEvent(true),mEventsBufferSize(6)
+   mChain(NULL), mEventCounter(0), mFillQaHists(false), mFillBackgroundTrees(false), mHists(NULL),mMixedEvent(true),mFillSoftPionEff(true),mEventsBufferSize(6)
 {}
 
 Int_t StPicoDstarMixedMaker::Init()
@@ -155,6 +155,7 @@ Int_t StPicoDstarMixedMaker::Make()
          if (centrality < 0 || centrality > 8) return kStOk;
          if (vz_bin < 0  ||  vz_bin > 9) return kStOk;
 
+         //help to efficiency correction//
          if (mFillQaHists)
          {
             for (unsigned short iTrack = 0; iTrack < nTracks; ++iTrack)
@@ -278,27 +279,49 @@ Int_t StPicoDstarMixedMaker::Make()
                if (!trk) continue;
                if (iTrack==kp->kaonIdx() ||
                    iTrack==kp->pionIdx())  continue;
-               if (!isGoodSoftPionTrack(trk, pVtx)) continue;
+
+               StThreeVectorF spMom = trk->gMom(pVtx, picoDst->event()->bField());
+               float spDca = float((trk->helix()).geometricSignedDistance(pVtx));
+               if (!isGoodSoftPionTrack(trk, spMom, spDca)) continue;
 //PID 
                if (!isTpcPion(trk)) continue;
                float spiBeta = getTofBeta(trk, pVtx);
                bool spiTofAvailable = !isnan(spiBeta) && spiBeta > 0;
                bool tofSoftPion = spiTofAvailable ? isTofPion(trk, spiBeta, pVtx) : true;//this is bybrid pid, not always require tof
+
                if (!tofSoftPion) continue;
-               StThreeVectorF spMom = trk->gMom(pVtx, picoDst->event()->bField());
 
               // if (kp->pt()/spMom.perp()>20 || kp->pt()/spMom.perp()<7) continue;
                StD0Pion D0Pion(kp,*kaon , *pion, *trk, kp->kaonIdx(),kp->pionIdx(),iTrack,pVtx, picoDst->event()->bField());
                bool rightsign = pion->charge() * trk->charge() >0 ? true : false;
                if ((D0Pion.m()-kp->m())<0.1 || (D0Pion.m()-kp->m())>0.2) continue;  
-               if (isGoodD0(kp)) mHists->addD0SoftPion(&D0Pion,kp,rightsign,centrality,reweight);
+               if (isGoodD0(kp)) { mHists->addD0SoftPion(&D0Pion,kp,rightsign,centrality,reweight);
+              }
                if (isD0SideBand(kp->m()))
                mHists->addSideBandBackground(&D0Pion,kp,rightsign,centrality,reweight);
            }//end of iTrack loop
          } // end of kaonPion loop
 
-//mixed event, loop and add softpion.
+         if (mFillSoftPionEff)
+         {
+          for (unsigned short iTrack = 0; iTrack<nTracks; ++iTrack)
+          {
+             StPicoTrack* trk = picoDst->track(iTrack);
+             if (!trk) continue;
 
+             StThreeVectorF spMom = trk->gMom(pVtx, picoDst->event()->bField());
+             float spDca = float((trk->helix()).geometricSignedDistance(pVtx));
+             if (!isGoodSoftPionTrack(trk, spMom, spDca)) continue;
+//PID 
+             if (!isTpcPion(trk)) continue;
+             float spiBeta = getTofBeta(trk, pVtx);
+             bool spiTofAvailable = !isnan(spiBeta) && spiBeta > 0;
+             bool tofSoftPion = spiTofAvailable ? isTofPion(trk, spiBeta, pVtx) : true;//this is hybrid pid, not always require tof
+           mHists->addSoftPionEff(spMom,spDca,true,tofSoftPion,centrality,reweight);
+          }//itrack
+         }//softpioneff
+
+//mixed event, loop and add softpion.
 if (mMixedEvent){
   //if no D0, then delete the event.
             if (event.getNoD0s()<1) {
@@ -309,7 +332,9 @@ if (mMixedEvent){
           {
                StPicoTrack* trk = picoDst->track(iTrack);
                if (!trk) continue;
-               if (!isGoodSoftPionTrack(trk, pVtx)) continue;
+               StThreeVectorF spMom = trk->gMom(pVtx, picoDst->event()->bField());
+               float spDca = float((trk->helix()).geometricSignedDistance(pVtx));
+               if (!isGoodSoftPionTrack(trk, spMom, spDca)) continue;
 //PID 
                if (!isTpcPion(trk)) continue;
                float spiBeta = getTofBeta(trk, pVtx);
@@ -413,12 +438,10 @@ bool StPicoDstarMixedMaker::isGoodTrack(StPicoTrack const* const trk, StThreeVec
           fabs(mom.pseudoRapidity()) <= anaCuts::Eta;
 }
 //----------------------------------------------------------------------------
-bool StPicoDstarMixedMaker::isGoodSoftPionTrack(StPicoTrack const* const trk, StThreeVectorF const& vtx) const
+bool StPicoDstarMixedMaker::isGoodSoftPionTrack(StPicoTrack const* const trk, StThreeVectorF const& mom, float spDca) const
 {
-   StThreeVectorF mom = trk->gMom(vtx, mPicoDstMaker->picoDst()->event()->bField());
    bool bnHistsFit = trk->nHitsFit() >= anaCuts::nHitsFit;
    bool bPt = mom.perp()>anaCuts::ptSoftPion_min;
-   float spDca = float((trk->helix()).geometricSignedDistance(vtx));
    bool bDca =std::fabs(spDca)<=anaCuts::DcaSoftPion;
    bool bEta = std::fabs(mom.pseudoRapidity())<=anaCuts::Eta;
 
