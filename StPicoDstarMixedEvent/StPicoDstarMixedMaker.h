@@ -41,11 +41,17 @@ public:
     int getEntries() const;
     void fillQaHistograms(bool b = true);
     void fillBackgroundTrees(bool b = true);
-    void addmixedevent(bool b=true){
+    void addmixedevent(bool b=true)
+    {
         mMixedEvent = b;
     }
-    void fillSoftPionEff(bool b = true ){
+    void fillSoftPionEff(bool b = true )
+    {
         mFillSoftPionEff = b;
+    }
+    void reconstructD(bool b = true)
+    {
+        mReconstructD = b;
     }
 private:
 
@@ -80,6 +86,7 @@ private:
     bool mFillQaHists;
     bool mFillBackgroundTrees;  
     bool mFillSoftPionEff;
+    bool mReconstructD;
    // -------------- USER variables -------------------------
    // add your member variables here. 
    // Remember that ntuples size can be really big, use histograms where appropriate 

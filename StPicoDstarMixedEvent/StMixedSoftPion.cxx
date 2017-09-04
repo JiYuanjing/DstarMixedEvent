@@ -20,6 +20,7 @@ StMixedSoftPion::StMixedSoftPion(StThreeVectorF const & pVtx, float B, StPicoTra
    StLorentzVectorF pionfourmom(mMom,mMom.massHypothesis(M_PION_PLUS));
    mLorentzVector = pionfourmom;
    mPt = mLorentzVector.perp();
+  //mPt = mMom.perp();
 }
 StMixedSoftPion::StMixedSoftPion(StMixedSoftPion const * t) : mOrigin(t->mOrigin), mMom(t->mMom), mCharge(t->mCharge), mLorentzVector(t->mLorentzVector)
 {

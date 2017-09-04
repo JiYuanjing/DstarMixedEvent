@@ -44,7 +44,7 @@ ClassImp(StPicoDstarMixedMaker)
 StPicoDstarMixedMaker::StPicoDstarMixedMaker(char const * name, TString const inputFilesList, TString const outFileBaseName, StPicoDstMaker* picoDstMaker, StRefMultCorr* grefmultCorrUtil):
    StMaker(name), mPicoDstMaker(picoDstMaker), mPicoD0Event(NULL), mGRefMultCorrUtil(grefmultCorrUtil),
    mInputFilesList(inputFilesList), mOutFileBaseName(outFileBaseName),
-   mChain(NULL), mEventCounter(0), mFillQaHists(false), mFillBackgroundTrees(false), mHists(NULL),mMixedEvent(true),mFillSoftPionEff(true),mEventsBufferSize(6)
+   mChain(NULL), mEventCounter(0), mFillQaHists(false), mFillBackgroundTrees(false), mHists(NULL),mMixedEvent(false),mFillSoftPionEff(true),mReconstructD(true), mEventsBufferSize(6)
 {}
 
 Int_t StPicoDstarMixedMaker::Init()
@@ -73,7 +73,7 @@ Int_t StPicoDstarMixedMaker::Init()
 
    mOutFileBaseName = mOutFileBaseName.ReplaceAll(".root", "");
    // -------------- USER VARIABLES -------------------------
-   mHists = new StPicoDstarMixedHists(mOutFileBaseName, mFillQaHists, mFillBackgroundTrees);
+   mHists = new StPicoDstarMixedHists(mOutFileBaseName, mReconstructD,mFillQaHists, mFillBackgroundTrees, mFillSoftPionEff);
    setEventsBufferSize(6);
    return kStOK;
 }
@@ -155,7 +155,7 @@ Int_t StPicoDstarMixedMaker::Make()
          if (centrality < 0 || centrality > 8) return kStOk;
          if (vz_bin < 0  ||  vz_bin > 9) return kStOk;
 
-         //help to efficiency correction//
+         //help to efficiency correction, used for D0//
          if (mFillQaHists)
          {
             for (unsigned short iTrack = 0; iTrack < nTracks; ++iTrack)
@@ -215,8 +215,8 @@ Int_t StPicoDstarMixedMaker::Make()
 
 //mixed event
           StDstarMixedEvent event(pVtx, picoDst->event()->bField(), reweight);
-        //  if (!mMixedEvent) delete event;
-
+         if (mReconstructD)
+         {
          for (int idx = 0; idx < aKaonPion->GetEntries(); ++idx)
          {
             StKaonPion const* kp = (StKaonPion*)aKaonPion->UncheckedAt(idx);
@@ -236,6 +236,7 @@ Int_t StPicoDstarMixedMaker::Make()
             bool kTofAvailable = !isnan(kBeta) && kBeta > 0;
             bool tofPion = piTofAvailable ? isTofPion(pion, piBeta, pVtx) : true;//this is bybrid pid, not always require tof
             bool tofKaon = kTofAvailable ? isTofKaon(kaon, kBeta, pVtx) : true;//this is bybrid pid, not always require tof
+
             bool tof = tofPion && tofKaon;
 
             bool D0unlike = kaon->charge() * pion->charge() < 0 ? true : false;
@@ -267,7 +268,7 @@ Int_t StPicoDstarMixedMaker::Make()
             if (!( isGoodD0(kp) || isD0SideBand(kp->m()) )) continue;
 //add softpion loop to reconstruct Dstar//
 //mixed event, add D0
-            if (mMixedEvent && isGoodD0(kp)){
+            if (mReconstructD && mMixedEvent && isGoodD0(kp)){
                 StMixedD0 mixD0(pVtx,picoDst->event()->bField(), kp, kaon, pion);
                 event.addD0(mixD0);
               }
@@ -295,12 +296,14 @@ Int_t StPicoDstarMixedMaker::Make()
                StD0Pion D0Pion(kp,*kaon , *pion, *trk, kp->kaonIdx(),kp->pionIdx(),iTrack,pVtx, picoDst->event()->bField());
                bool rightsign = pion->charge() * trk->charge() >0 ? true : false;
                if ((D0Pion.m()-kp->m())<0.1 || (D0Pion.m()-kp->m())>0.2) continue;  
-               if (isGoodD0(kp)) { mHists->addD0SoftPion(&D0Pion,kp,rightsign,centrality,reweight);
+               if (isGoodD0(kp)) { 
+                 mHists->addD0SoftPion(&D0Pion,kp,rightsign,centrality,reweight);
               }
                if (isD0SideBand(kp->m()))
                mHists->addSideBandBackground(&D0Pion,kp,rightsign,centrality,reweight);
            }//end of iTrack loop
          } // end of kaonPion loop
+        }//reconstructD 
 
          if (mFillSoftPionEff)
          {
@@ -312,17 +315,20 @@ Int_t StPicoDstarMixedMaker::Make()
              StThreeVectorF spMom = trk->gMom(pVtx, picoDst->event()->bField());
              float spDca = float((trk->helix()).geometricSignedDistance(pVtx));
              if (!isGoodSoftPionTrack(trk, spMom, spDca)) continue;
+             
 //PID 
-             if (!isTpcPion(trk)) continue;
+             if (!isTpcPion(trk)) continue;                                    
              float spiBeta = getTofBeta(trk, pVtx);
              bool spiTofAvailable = !isnan(spiBeta) && spiBeta > 0;
-             bool tofSoftPion = spiTofAvailable ? isTofPion(trk, spiBeta, pVtx) : true;//this is hybrid pid, not always require tof
-           mHists->addSoftPionEff(spMom,spDca,true,tofSoftPion,centrality,reweight);
+           //  bool tofSoftPion = spiTofAvailable ? isTofPion(trk, spiBeta, pVtx) : true;//this is hybrid pid, not always require tof
+
+           mHists->addSoftPionEff(spMom,spDca,true,spiTofAvailable,centrality,reweight, trk->charge());
+           
           }//itrack
          }//softpioneff
 
 //mixed event, loop and add softpion.
-if (mMixedEvent){
+if (mReconstructD&&mMixedEvent){
   //if no D0, then delete the event.
             if (event.getNoD0s()<1) {
               return kStOK;
@@ -444,7 +450,6 @@ bool StPicoDstarMixedMaker::isGoodSoftPionTrack(StPicoTrack const* const trk, St
    bool bPt = mom.perp()>anaCuts::ptSoftPion_min;
    bool bDca =std::fabs(spDca)<=anaCuts::DcaSoftPion;
    bool bEta = std::fabs(mom.pseudoRapidity())<=anaCuts::Eta;
-
    return bnHistsFit && bPt && bDca && bEta;
 }
 //-----------------------------------------------------------------------------
