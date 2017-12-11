@@ -30,18 +30,19 @@ class StMixedD0Pion;
 class StPicoDstarMixedHists
 {
   public:
-   StPicoDstarMixedHists(TString fileBaseName, bool reconstructD=true,bool fillQaHists=true, bool fillBackgroundTrees=false, bool fillSoftPionEff=true);
+   StPicoDstarMixedHists(TString fileBaseName, bool reconstructD=true,bool fillQaHists=true, bool fillBackgroundTrees=false, bool fillSoftPionEff=true, bool softpionQa=true);
    virtual ~StPicoDstarMixedHists();
    void addEvent(StPicoEvent const *);
    void addEventBeforeCut(StPicoEvent const *);
    void addCent(const double refmultCor, int centrality, const double reweight, const float vz);
    void addKaonPion(StKaonPion const*, bool unlike, bool tpc, bool tof, int centrality, const double reweight);
    //
-//   void addD0Pion(StD0Pion const*, bool unlike, bool tpc, bool tof, int centrality, const double reweight);
-void addSoftPionEff(StThreeVectorF const& spMom,float spdca, bool tpc,bool tof, int centrality, const double reweight, short int charge);
-void addD0SoftPion(StD0Pion const* const d0p, StKaonPion const* const kp, bool unlike,  int centrality, const double reweight);
-void addSideBandBackground(StD0Pion const* const d0p, StKaonPion const* const k,bool unlike, int centrality, const double reweight);
-void addMixedEventBackground(StMixedD0Pion const & mixD0Pion,bool unlike, int centrality,const double reweight);
+// void addD0Pion(StD0Pion const*, bool unlike, bool tpc, bool tof, int centrality, const double reweight);
+  void addSoftPionEff(StThreeVectorF const& spMom, bool tpcpion, bool tofavailable, bool tofPion, double diffBeta, double nSigmaPion, double beta_pi, int centrality, const double reweight, short const charge);
+  void addSoftPionQa(StThreeVectorF const& spMom,float spdca, int centrality, const double reweight, short int charge);
+  void addD0SoftPion(StD0Pion const* const d0p, StKaonPion const* const kp, bool unlike,  int centrality, const double reweight);
+  void addSideBandBackground(StD0Pion const* const d0p, StKaonPion const* const k,bool unlike, int centrality, const double reweight);
+  void addMixedEventBackground(StMixedD0Pion const & mixD0Pion,bool unlike, int centrality,const double reweight);
 //
    void addBackground(StKaonPion const*, StPicoTrack const* kaon, StPicoTrack const* pion, int ptBin, bool SB);
    void addTpcDenom1(bool IsPion, bool IsKaon, bool IsProton, float pt, int centrality, float Eta, float Phi, float Vz, float ZdcX);
@@ -64,6 +65,7 @@ private:
    bool mFillBackgroundTrees;
    bool mFillSoftPionEff;
    bool mReconstructD;
+   bool mSoftPionQa;
    StPicoPrescales* mPrescales;
    TFile* mOutFile;
    TH1F* mh1TotalEventsInRun;
@@ -127,6 +129,10 @@ private:
 
    TNtuple* mNtDstarBackgroungSameSign[anaCuts::nPtBins];
    TNtuple* mNtDstarBackgroungSideBand[anaCuts::nPtBins];
+   //caculate the D0 massrange efficiency
+   TH3F* mh3InvariantMassVsPtVsrapidityD0[9];
+   TH3F* mh3InvariantMassVsPtVsrapidityD0like[9];
+   
 //Dstar
    TH2F* mh2InvariantMassVsPtDstar; 
    TH2F* mh2InvariantMassVsPtSBDstar; 
@@ -136,9 +142,15 @@ private:
    TH3F* mh3InvariantMassVsPtVsCentLikeDstar;
    TH2F* mh2InvariantMassVsPtDstarD0;
    TH2F* mh2InvariantMassVsPtSBD0;
+//Dstar softpion efficiency
    TH3F* mh3SoftPionDcaVsPtVsCent;
    TH3F* mh3SoftPionPtVsEtaVsPhiTPC[2][9];
    TH3F* mh3SoftPionPtVsEtaVsPhiTof[2][9];
+   TH3F* mh3SoftPionPtVsEtaVsPhiQa[2][9];
+   TH3F* mh3SoftPionPtVsdiffInvBetaVsCent;
+   TH3F* mh3SoftPionPtVsBetaVsCent;
+   TH3F* mh3SoftPionPtVsnSigmaVsCent;
+   
 //Dstar mixed event 
    TH2F* mh2InvariantMassVsPtDstarMixed;
    TH3F* mh3InvariantMassVsPtVsCentDstarMixed;

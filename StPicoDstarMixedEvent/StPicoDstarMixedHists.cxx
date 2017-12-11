@@ -30,9 +30,9 @@
 #include "StMixedD0Pion.h"
 
 //-----------------------------------------------------------------------
-StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstructD, bool fillQaHists, bool fillBackgroundTrees, bool fillSoftPionEff) : mFillQaHists(fillQaHists), mFillBackgroundTrees(fillBackgroundTrees),mFillSoftPionEff(fillSoftPionEff),mReconstructD(reconstructD),
+StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstructD, bool fillQaHists, bool fillBackgroundTrees, bool fillSoftPionEff, bool softpionQa) : mFillQaHists(fillQaHists), mFillBackgroundTrees(fillBackgroundTrees),mFillSoftPionEff(fillSoftPionEff),mReconstructD(reconstructD),mSoftPionQa(softpionQa),
    mPrescales(NULL), mOutFile(NULL), mh2InvariantMassVsPt(NULL), mh2InvariantMassVsPtLike(NULL), mh2InvariantMassVsPtTof(NULL), mh2InvariantMassVsPtTofLike(NULL),
-   mh1Cent(NULL), mh1CentWg(NULL), mh1gRefmultCor(NULL), mh1gRefmultCorWg(NULL), mh2CentVz(NULL), mh2CentVzWg(NULL), mh3InvariantMassVsPtVsCent(NULL), mh3InvariantMassVsPtVsCentLike(NULL), mh3InvariantMassVsPtVsCentTof(NULL), mh3InvariantMassVsPtVsCentTofLike(NULL),mh2InvariantMassVsPtDstar(NULL), mh2InvariantMassVsPtLikeDstar(NULL),mh3InvariantMassVsPtVsCentDstar(NULL), mh3InvariantMassVsPtVsCentLikeDstar(NULL), mh3InvariantMassVsPtVsCentSBDstar(NULL),mh2InvariantMassVsPtSBDstar(NULL),mh2InvariantMassVsPtDstarD0(NULL), mh2InvariantMassVsPtSBD0(NULL),mh3SoftPionDcaVsPtVsCent(NULL),
+   mh1Cent(NULL), mh1CentWg(NULL), mh1gRefmultCor(NULL), mh1gRefmultCorWg(NULL), mh2CentVz(NULL), mh2CentVzWg(NULL), mh3InvariantMassVsPtVsCent(NULL), mh3InvariantMassVsPtVsCentLike(NULL), mh3InvariantMassVsPtVsCentTof(NULL), mh3InvariantMassVsPtVsCentTofLike(NULL),mh2InvariantMassVsPtDstar(NULL), mh2InvariantMassVsPtLikeDstar(NULL),mh3InvariantMassVsPtVsCentDstar(NULL), mh3InvariantMassVsPtVsCentLikeDstar(NULL), mh3InvariantMassVsPtVsCentSBDstar(NULL),mh2InvariantMassVsPtSBDstar(NULL),mh2InvariantMassVsPtDstarD0(NULL), mh2InvariantMassVsPtSBD0(NULL),mh3SoftPionDcaVsPtVsCent(NULL), mh3SoftPionPtVsdiffInvBetaVsCent(NULL), mh3SoftPionPtVsBetaVsCent(NULL), mh3SoftPionPtVsnSigmaVsCent(NULL),
    mh2InvariantMassVsPtDstarMixed(NULL), mh3InvariantMassVsPtVsCentDstarMixed(NULL),
    buffer(NULL)
 
@@ -80,14 +80,23 @@ StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstr
      }
    }
 
+   for (int icent=0;icent<9;icent++)
+   {
+     for (int chg=0;chg<2;chg++)
+     {
+       mh3SoftPionPtVsEtaVsPhiQa[chg][icent]= NULL;
+     }
+   }
+   for (int icent=0;icent<9;icent++)
+   {
+      mh3InvariantMassVsPtVsrapidityD0[icent] = NULL;    
+      mh3InvariantMassVsPtVsrapidityD0like[icent] = NULL;          
+   }
    int nRuns = mPrescales->numberOfRuns();
    TH1::SetDefaultSumw2();
    mh1TotalEventsInRun         = new TH1F("mh1TotalEventsInRun", "totalEventsInRun;runIndex;totalEventsInRun", nRuns + 1, 0, nRuns + 1);
    mh1TotalEventsInRunBeforeCut = new TH1F("mh1TotalEventsInRunBeforeCut", "totalEventsInRun;runIndex;totalEventsInRun", nRuns + 1, 0, nRuns + 1);
-   mh2InvariantMassVsPt        = new TH2F("mh2InvariantMassVsPt", "invariantMassVsPt;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
-   mh2InvariantMassVsPtLike    = new TH2F("mh2InvariantMassVsPtLike", "invariantMassVsPtLike;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
-   mh2InvariantMassVsPtTof     = new TH2F("mh2InvariantMassVsPtTof", "invariantMassVsPtTof;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
-   mh2InvariantMassVsPtTofLike = new TH2F("mh2InvariantMassVsPtTofLike", "invariantMassVsPtTofLike;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+
    //add centrality
    mh1Cent         = new TH1F("mh1Cent", "EventsVsCentrality;cent;Counts", 10, -1.5, 8.5);
    mh1CentWg         = new TH1F("mh1CentWg", "EventsVsCentrality;cent;Counts", 10, -1.5, 8.5);
@@ -97,10 +106,21 @@ StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstr
    mh2CentVzWg         = new TH2F("mh2CentVzWg", "CentralityVsVzWg;cent;Vz", 10, -1.5, 8.5, 200, -10, 10);
 
   if (mReconstructD){
+    //D0 histogram
+    mh2InvariantMassVsPt        = new TH2F("mh2InvariantMassVsPt", "invariantMassVsPt;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    mh2InvariantMassVsPtLike    = new TH2F("mh2InvariantMassVsPtLike", "invariantMassVsPtLike;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    mh2InvariantMassVsPtTof     = new TH2F("mh2InvariantMassVsPtTof", "invariantMassVsPtTof;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    mh2InvariantMassVsPtTofLike = new TH2F("mh2InvariantMassVsPtTofLike", "invariantMassVsPtTofLike;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
    mh3InvariantMassVsPtVsCent        = new TH3F("mh3InvariantMassVsPtVsCent", "invariantMassVsPtVsCent;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
    mh3InvariantMassVsPtVsCentLike    = new TH3F("mh3InvariantMassVsPtVsCentLike", "invariantMassVsPtVsCentLike;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
    mh3InvariantMassVsPtVsCentTof     = new TH3F("mh3InvariantMassVsPtVsCentTof", "invariantMassVsPtVsCentTof;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
    mh3InvariantMassVsPtVsCentTofLike = new TH3F("mh3InvariantMassVsPtVsCentTofLike", "invariantMassVsPtVsCentTofLike;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
+
+   for (int icent=0;icent<9;icent++)
+   {
+     mh3InvariantMassVsPtVsrapidityD0[icent]= new TH3F(Form("mh3InvariantMassVsPtVsrapiditycent%d",icent),"InvariantMassVsPtVsrapidity;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2});rapidity",120, 0, 12, 100, -1, 1, 50, 1.6, 2.1);
+     mh3InvariantMassVsPtVsrapidityD0like[icent]= new TH3F(Form("mh3InvariantMassVsPtVsrapiditycent%dlike",icent),"InvariantMassVsPtVsrapidity;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2});rapidity",120, 0, 12, 100, -1, 1, 50, 1.6, 2.1);
+   }
 
    //Dstar histogram
     mh2InvariantMassVsPtDstar        = new TH2F("mh2InvariantMassVsPtDstar", "invariantMassVsPt;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
@@ -117,22 +137,33 @@ StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstr
      mh2InvariantMassVsPtDstarMixed = new TH2F("mh2InvariantMassVsPtDstarMixed", "invariantMassVsPtMixedEvent;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
      mh3InvariantMassVsPtVsCentDstarMixed = new TH3F("mh3InvariantMassVsPtVsCentDstarMixedEvent", "invariantMassVsPtVsCentDstarMixedEvent;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
      buffer = new TH3F("mh3eventinbufferVsVzVsCent", "eventinbufferVsPtVsCent;Vzbin;Cent;Counts", 12, -1, 11, 11, -1, 10, 6, 0, 6);
-  
-  }  //reconstructD
+    }  //reconstructD
 
    if (mFillSoftPionEff)
     {
+      /*
       for (int icent=0;icent<9;icent++)
       {
-        mh3SoftPionPtVsEtaVsPhiTPC[0][icent]= new TH3F(Form("mh3SoftPionPtVsEtaVsPhiTPC_minus_cent%d",icent),"SoftPionPtVsEtaVsPhiTPC;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,10,-1,1,10,-3.14159,3.14159);
-        mh3SoftPionPtVsEtaVsPhiTof[0][icent] = new TH3F(Form("mh3SoftPionPtVsEtaVsPhiTof_minus_cent%d",icent),"mh3SoftPionPtVsEtaVsPhiTof;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,10,-1,1,10,-3.14159,3.14159);
+        mh3SoftPionPtVsEtaVsPhiTPC[0][icent]= new TH3F(Form("mh3SoftPionPtVsEtaVsPhiTPC_minus_cent%d",icent),"SoftPionPtVsEtaVsPhiTPC;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,50,-1,1,50,-3.14159,3.14159);
+        mh3SoftPionPtVsEtaVsPhiTof[0][icent] = new TH3F(Form("mh3SoftPionPtVsEtaVsPhiTof_minus_cent%d",icent),"mh3SoftPionPtVsEtaVsPhiTof;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,50,-1,1,50,-3.14159,3.14159);
         
-        mh3SoftPionPtVsEtaVsPhiTPC[1][icent]= new TH3F(Form("mh3SoftPionPtVsEtaVsPhiTPC_plus_cent%d",icent),"SoftPionPtVsEtaVsPhiTPC;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,10,-1,1,10,-3.14159,3.14159);
-        mh3SoftPionPtVsEtaVsPhiTof[1][icent] = new TH3F(Form("mh3SoftPionPtVsEtaVsPhiTof_plus_cent%d",icent),"mh3SoftPionPtVsEtaVsPhiTof;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,10,-1,1,10,-3.14159,3.14159);
+        mh3SoftPionPtVsEtaVsPhiTPC[1][icent]= new TH3F(Form("mh3SoftPionPtVsEtaVsPhiTPC_plus_cent%d",icent),"SoftPionPtVsEtaVsPhiTPC;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,50,-1,1,50,-3.14159,3.14159);
+        mh3SoftPionPtVsEtaVsPhiTof[1][icent] = new TH3F(Form("mh3SoftPionPtVsEtaVsPhiTof_plus_cent%d",icent),"mh3SoftPionPtVsEtaVsPhiTof;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,50,-1,1,50,-3.14159,3.14159);
       }
-      mh3SoftPionDcaVsPtVsCent = new TH3F("mh2SoftPionDcaVsPtVsCent","SoftPionCountsDcaVsPtVscent;p_{T}(#pi)(GeV/c);Cent;Dca(mm)",120,0,12,10,-1.5,8.5,350,-3.5,3.5);
+*/
+      mh3SoftPionPtVsdiffInvBetaVsCent = new TH3F("mh3SoftPionPtVsdiffInvBetaVsEta","SoftPionPtVsdiffInvBetaVsEta;p_{T}(GeV/c);diffInvBeta;Eta",200,0,2,200,-0.1,0.1,10,-1,1);
+      mh3SoftPionPtVsBetaVsCent = new TH3F("mh3SoftPionPtVsBetaVsEta","SoftPionPtVsBetaVsCent;p_{T}(GeV/c);InvBeta;Eta",200,0,2,600,0.5,5.5,10,-1,1);
+      mh3SoftPionPtVsnSigmaVsCent = new TH3F("mh3SoftPionPtVsnSigmaVsCent","SoftPionPtVsnSigmaVsCent;p_{T}(GeV/c);nSigma;Cent",200,0,2,50,-5,5,10,-0.5,9.5);
     }  //softpioneff
 
+    if(mSoftPionQa){
+      for (int icent=0;icent<9;icent++)
+    {
+      mh3SoftPionPtVsEtaVsPhiQa[1][icent]= new TH3F(Form("mh3SoftPionPtVsEtaVsPhiQa_plus_cent%d",icent),"mh3SoftPionPtVsEtaVsPhiQa;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,10,-1,1,10,-3.14159,3.14159); 
+      mh3SoftPionPtVsEtaVsPhiQa[0][icent]= new TH3F(Form("mh3SoftPionPtVsEtaVsPhiQa_minus_cent%d",icent),"mh3SoftPionPtVsEtaVsPhiQa;p_{T}(#pi)(GeV/c);Eta;Phi",500,0,10,10,-1,1,10,-3.14159,3.14159); 
+    }
+    mh3SoftPionDcaVsPtVsCent = new TH3F("mh3SoftPionDcaVsPtVsCent","SoftPionCountsDcaVsPtVscent;p_{T}(#pi)(GeV/c);Cent;Dca(mm)",120,0,12,10,-1.5,8.5,350,-3.5,3.5);
+  }
 
    if(mFillBackgroundTrees)
    {
@@ -174,7 +205,6 @@ StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstr
       }
    }
 
-
    // Add some Dca, resolution
    for (int iParticle = 0; iParticle < anaCuts::nParticles; iParticle++)
    {
@@ -190,7 +220,6 @@ StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstr
       }
    }
 
-
    mh3DcaPtCent  = new TH3F("mh3DcaPtCent", "mh3DcaPtCent;p_{T}(GeV/c);cent;Dca(cm)", 120, 0, 12, 10, -1.5, 8.5, 1000, -1, 1); //Dca 1.cm
    mh3DcaXyPtCent  = new TH3F("mh3DcaXyPtCent", "mh3DcaXyPtCent;p_{T}(GeV/c);cent;DcaXy(cm)", 120, 0, 12, 10, -1.5, 8.5, 1000, -1, 1); //Dca 1.cm
    mh3DcaZPtCent  = new TH3F("mh3DcaZPtCent", "mh3DcaZPtCent;p_{T}(GeV/c);cent;DcaZ(cm)", 120, 0, 12, 10, -1.5, 8.5, 1000, -1, 1); //Dca 1.cm
@@ -198,6 +227,7 @@ StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstr
 //  nt = new TNtuple("nt","nt","runnumber:dca:vz:pt:eta:phi:centrality:grefmultCor:zdcCoincidance:tofMatchFlag:hftMatchFlag");
 
 }
+
 StPicoDstarMixedHists::~StPicoDstarMixedHists()
 {
    delete mPrescales;
@@ -288,6 +318,7 @@ void StPicoDstarMixedHists::addKaonPion(StKaonPion const* const kp, bool unlike,
       if (tof) mh2InvariantMassVsPtTof->Fill(kp->pt(), kp->m(), reweight);
       if (tpc) mh3InvariantMassVsPtVsCent->Fill(kp->pt(), centrality, kp->m(), reweight);
       if (tof) mh3InvariantMassVsPtVsCentTof->Fill(kp->pt(), centrality, kp->m(), reweight);
+      if (tof) mh3InvariantMassVsPtVsrapidityD0[centrality]->Fill(kp->pt(),kp->lorentzVector().rapidity(),kp->m(), reweight) ;
    }
    else
    {
@@ -295,6 +326,8 @@ void StPicoDstarMixedHists::addKaonPion(StKaonPion const* const kp, bool unlike,
       if (tof) mh2InvariantMassVsPtTofLike->Fill(kp->pt(), kp->m(), reweight);
       if (tpc) mh3InvariantMassVsPtVsCentLike->Fill(kp->pt(), centrality, kp->m(), reweight);
       if (tof) mh3InvariantMassVsPtVsCentTofLike->Fill(kp->pt(), centrality, kp->m(), reweight);
+     
+     if (tof) mh3InvariantMassVsPtVsrapidityD0like[centrality]->Fill(kp->pt(),kp->lorentzVector().rapidity(), kp->m(),reweight) ;
    }
 }
 //-----------------------------------------------------------------------
@@ -412,18 +445,38 @@ void StPicoDstarMixedHists::addQaNtuple(int runnumber, float dca, float vz, floa
 //  nt->Fill(runnumber, dca, vz, pt, eta, phi, centrality, refmultCor, zdcx, tofMatchFlag, hftMatchFlag);
 }
 //---------------------------------------------------------------------
-void StPicoDstarMixedHists::addSoftPionEff(StThreeVectorF const& spMom,float spdca, bool tpc,bool tof, int centrality, const double reweight, short const charge)
+void StPicoDstarMixedHists::addSoftPionEff(StThreeVectorF const& spMom, bool tpcpion, bool tofavailable, bool tofPion, double diffBeta, double nSigmaPion, double beta_pi, int centrality, const double reweight, short const charge)
 {
+  /*
+  //tof match efficiency
+  if (tpcpion) {
+    if (charge<0)  mh3SoftPionPtVsEtaVsPhiTPC[0][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi(), reweight);
+    if (charge>0) mh3SoftPionPtVsEtaVsPhiTPC[1][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi(), reweight);
   
-  if (tpc) {
-  if (charge<0)  mh3SoftPionPtVsEtaVsPhiTPC[0][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi());
-  if (charge>0) mh3SoftPionPtVsEtaVsPhiTPC[1][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi());
+  if (tofavailable) {
+    if (charge<0)  mh3SoftPionPtVsEtaVsPhiTof[0][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi(), reweight);
+    if (charge>0) mh3SoftPionPtVsEtaVsPhiTof[1][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi(), reweight);
+    }
   }
-  if (tof) {
-    if (charge<0)  mh3SoftPionPtVsEtaVsPhiTof[0][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi());
-    if (charge>0) mh3SoftPionPtVsEtaVsPhiTof[1][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi());
+  */
+  //tpc pid efficiency
+  if (tofPion){
+  mh3SoftPionPtVsnSigmaVsCent->Fill(spMom.perp(), nSigmaPion, centrality, reweight);
   }
-  mh3SoftPionDcaVsPtVsCent->Fill(spdca, spMom.perp(),centrality,reweight);
+
+  //tof pid efficiency
+  if (tpcpion && tofavailable && fabs(diffBeta)<0.1){
+    mh3SoftPionPtVsdiffInvBetaVsCent->Fill(spMom.perp(), diffBeta,spMom.pseudoRapidity(), reweight);
+      //
+  }
+  mh3SoftPionPtVsBetaVsCent->Fill(spMom.mag(), beta_pi, spMom.pseudoRapidity(), reweight);
+}
+//---------------------------------------------------------------------
+void StPicoDstarMixedHists::addSoftPionQa(StThreeVectorF const& spMom,float spdca, int centrality, const double reweight, short const charge)
+{
+  if (charge<0)  mh3SoftPionPtVsEtaVsPhiQa[0][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi());
+  if (charge>0) mh3SoftPionPtVsEtaVsPhiQa[1][centrality]->Fill(spMom.perp(),spMom.pseudoRapidity(), spMom.phi());
+  mh3SoftPionDcaVsPtVsCent->Fill(spdca, spMom.perp(), centrality, reweight);
 }
 //---------------------------------------------------------------------
 void StPicoDstarMixedHists::addD0SoftPion(StD0Pion const* const d0p, StKaonPion const* const kp, bool unlike, int centrality, const double reweight)
@@ -442,6 +495,7 @@ void StPicoDstarMixedHists::addD0SoftPion(StD0Pion const* const d0p, StKaonPion 
    }
  
 }
+
 void StPicoDstarMixedHists::addSideBandBackground(StD0Pion const* const d0p, StKaonPion const* const kp,bool unlike, int centrality, const double reweight)
 {
       if (unlike){
@@ -449,7 +503,6 @@ void StPicoDstarMixedHists::addSideBandBackground(StD0Pion const* const d0p, StK
         mh2InvariantMassVsPtSBDstar->Fill(d0p->pt(), d0p->m()-kp->m(), reweight);
       mh3InvariantMassVsPtVsCentSBDstar->Fill(d0p->pt(), centrality, d0p->m()-kp->m(), reweight);
       }
-      
 }
 
 void StPicoDstarMixedHists::addMixedEventBackground(StMixedD0Pion const & mixD0Pion,bool unlike,int centrality,const double reweight)
@@ -464,6 +517,7 @@ void StPicoDstarMixedHists::addeventsinbuffer(const int vzbin,const int centrali
 {
       buffer->Fill(vzbin,centrality, size);
 }
+
 void StPicoDstarMixedHists::closeFile()
 {
    mOutFile->cd();
@@ -489,6 +543,11 @@ void StPicoDstarMixedHists::closeFile()
    mh3InvariantMassVsPtVsCentLike->Write();
    mh3InvariantMassVsPtVsCentTof->Write();
    mh3InvariantMassVsPtVsCentTofLike->Write();
+   for (int icent=0;icent<9;icent++)
+   {
+     mh3InvariantMassVsPtVsrapidityD0[icent]->Write();
+     mh3InvariantMassVsPtVsrapidityD0like[icent]->Write();
+   }
    //Dstar
    mh2InvariantMassVsPtDstar->Write();
    mh2InvariantMassVsPtSBDstar->Write();
@@ -504,10 +563,23 @@ void StPicoDstarMixedHists::closeFile()
    buffer->Write();
     }  //resconstructD
       
-   //spion eff
+//spion Qa
+    if (mSoftPionQa)
+  {
+   for (int icent=0;icent<9;icent++)
+   {
+     for (int chg=0;chg<2;chg++)
+     {
+      mh3SoftPionPtVsEtaVsPhiQa[chg][icent]->Write();
+     }
+   }
    mh3SoftPionDcaVsPtVsCent->Write();
+  }
+
+   //spion eff
    if (mFillSoftPionEff)
    {
+     /*
       for (int icent=0;icent<9;icent++)
       {
         for (int chg=0;chg<2;chg++)
@@ -516,6 +588,10 @@ void StPicoDstarMixedHists::closeFile()
          mh3SoftPionPtVsEtaVsPhiTPC[chg][icent]->Write();
         }
       }
+*/
+      mh3SoftPionPtVsdiffInvBetaVsCent->Write();
+      mh3SoftPionPtVsBetaVsCent->Write();
+      mh3SoftPionPtVsnSigmaVsCent->Write();
    }
 
    if(mFillBackgroundTrees)

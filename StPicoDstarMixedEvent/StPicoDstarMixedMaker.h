@@ -53,6 +53,11 @@ public:
     {
         mReconstructD = b;
     }
+    void softpionQa(bool b = true)
+    {
+        mSoftPionQa = b;
+    }
+    
 private:
 
     StPicoDstarMixedMaker() {}
@@ -68,13 +73,16 @@ private:
     bool isTpcKaon(StPicoTrack const*) const;
     bool isTpcProton(StPicoTrack const*) const;
     bool isTofPion(StPicoTrack const*, float beta, StThreeVectorF const& vtx) const;
+    bool isTofSoftPion(StPicoTrack const*, float beta, StThreeVectorF const& vtx) const;
     bool isTofKaon(StPicoTrack const*, float beta, StThreeVectorF const& vtx) const;
     bool isTofProton(StPicoTrack const*, float beta, StThreeVectorF const& vtx) const;
     bool isGoodPair(StKaonPion const*) const;
+    bool isGoodDstar(StD0Pion const* const D0Pion) const;
     bool isD0SideBand(float m) const;
     float getTofBeta(StPicoTrack const*,StThreeVectorF const& vtx) const;
     int trkHalf(StPicoTrack const*, StThreeVectorF const& vtx) const;
     bool isGoodD0(StKaonPion const*) const;
+    int findptbin(double pt) const;
     StPicoDstMaker* mPicoDstMaker;
     StPicoD0Event* mPicoD0Event;
     StRefMultCorr* mGRefMultCorrUtil;
@@ -87,6 +95,7 @@ private:
     bool mFillBackgroundTrees;  
     bool mFillSoftPionEff;
     bool mReconstructD;
+    bool mSoftPionQa;
    // -------------- USER variables -------------------------
    // add your member variables here. 
    // Remember that ntuples size can be really big, use histograms where appropriate 

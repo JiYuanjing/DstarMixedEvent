@@ -42,7 +42,8 @@ namespace anaCuts
    int   const nPtBins = 5;
    float const PtBinsEdge[nPtBins + 1] = {0., 1., 2., 3., 5., 15.}; //this is for optimaized cut
 
-   float const minPt = 0.3;//1.2
+   float const minPt = 0.6;//1.2
+   // float const minPt = 0.3;//1.2
    int const nHitsFit = 20;
 
    //track eta cut
@@ -50,7 +51,8 @@ namespace anaCuts
    //pions
    float const nSigmaPion = 3.0;
    float const piTofBetaDiff = 0.03;
-
+   const float spiTofBetaDiff_low[11] = {-0.03,-0.03,-0.022,-0.02,-0.02,-0.02,-0.0218,-0.0226,-0.023,-0.0235,-0.025};
+   const float spiTofBetaDiff_high[11] = {0.18,0.178,0.095,0.073,0.059,0.05,0.05,0.047,0.043,0.0386,0.035};    
    //kaons
    float const nSigmaKaon = 2.0;
    float const kTofBetaDiff = 0.03;
@@ -174,7 +176,7 @@ namespace anaCuts
 //------------------------------------------------------------
 //D_star cut 
 float const mD0_max=1.90;
-float const mD0_min=1.83;
+float const mD0_.part1min=1.83;
 float const cosThetaStar=0.8;
 float const ptD0_min=7;
 float const ptSoftPion_max=20;
