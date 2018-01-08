@@ -18,11 +18,14 @@ class StMixedD0Pion : public TObject
 
     StLorentzVectorF const & lorentzVector() const { return mLorentzVector;}
 //D_star
-    float deltaM() const { return mdeltaM;}
-    float m() const { return mLorentzVector.m();}
-    float pt() const { return mLorentzVector.perp();}
-    float eta() const { return mLorentzVector.pseudoRapidity();}
-    float phi() const { return mLorentzVector.phi();}
+    float const deltaM() const { return mdeltaM;}
+    float const m() const { return mLorentzVector.m();}
+    float const pt() const { return mLorentzVector.perp();}
+    float const eta() const { return mLorentzVector.pseudoRapidity();}
+    float const phi() const { return mLorentzVector.phi();}
+    StLorentzVectorF const & D0lorentzVector() const { return mD0LorentzVector;}
+    StLorentzVectorF const & PilorentzVector() const { return mPiLorentzVector;}
+    short const charge() const { return mCharge;}
     float D0toPion_pt() const{
         return mD0toPion_pt;
     }
@@ -31,8 +34,11 @@ class StMixedD0Pion : public TObject
 private:
     float mdeltaM;
     StLorentzVectorF mLorentzVector;
+    short mCharge;
     bool mRightsign;
     float mD0toPion_pt;
+    StLorentzVectorF mD0LorentzVector;
+    StLorentzVectorF mPiLorentzVector;
     ClassDef(StMixedD0Pion,1)
 };
 #endif

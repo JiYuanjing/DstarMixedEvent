@@ -33,8 +33,7 @@
 StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstructD, bool fillQaHists, bool fillBackgroundTrees, bool fillSoftPionEff, bool softpionQa) : mFillQaHists(fillQaHists), mFillBackgroundTrees(fillBackgroundTrees),mFillSoftPionEff(fillSoftPionEff),mReconstructD(reconstructD),mSoftPionQa(softpionQa),
    mPrescales(NULL), mOutFile(NULL), mh2InvariantMassVsPt(NULL), mh2InvariantMassVsPtLike(NULL), mh2InvariantMassVsPtTof(NULL), mh2InvariantMassVsPtTofLike(NULL),
    mh1Cent(NULL), mh1CentWg(NULL), mh1gRefmultCor(NULL), mh1gRefmultCorWg(NULL), mh2CentVz(NULL), mh2CentVzWg(NULL), mh3InvariantMassVsPtVsCent(NULL), mh3InvariantMassVsPtVsCentLike(NULL), mh3InvariantMassVsPtVsCentTof(NULL), mh3InvariantMassVsPtVsCentTofLike(NULL),mh2InvariantMassVsPtDstar(NULL), mh2InvariantMassVsPtLikeDstar(NULL),mh3InvariantMassVsPtVsCentDstar(NULL), mh3InvariantMassVsPtVsCentLikeDstar(NULL), mh3InvariantMassVsPtVsCentSBDstar(NULL),mh2InvariantMassVsPtSBDstar(NULL),mh2InvariantMassVsPtDstarD0(NULL), mh2InvariantMassVsPtSBD0(NULL),mh3SoftPionDcaVsPtVsCent(NULL), mh3SoftPionPtVsdiffInvBetaVsCent(NULL), mh3SoftPionPtVsBetaVsCent(NULL), mh3SoftPionPtVsnSigmaVsCent(NULL),
-   mh2InvariantMassVsPtDstarMixed(NULL), mh3InvariantMassVsPtVsCentDstarMixed(NULL),
-   buffer(NULL)
+   mh2InvariantMassVsPtDstarMixed(NULL), mh3InvariantMassVsPtVsCentDstarMixed(NULL), mh3MDstarVsD0PtVsCentDstarMixed(NULL), mh3MDstarVsD0PtVsCent(NULL), mh3MDstarVsD0PtVsCentLike(NULL), buffer(NULL),mhnDstarD0PiMassCentCharge(NULL),mhnDstarD0PiMassCentChargeLK(NULL),mhnDstarD0PiMassCentChargeMix(NULL),mhnDstarD0PiMassCentChargeMixLK(NULL),mhnDstarD0PiMassCentChargeSB(NULL)
 
    // mh2Tpc1PtCent(NULL),  mh2Tpc1PhiVz(NULL), mh2HFT1PtCent(NULL),  mh2HFT1PhiVz(NULL),  mh3DcaXyPtCent(NULL), mh3DcaZPtCent(NULL),
 {
@@ -107,37 +106,57 @@ StPicoDstarMixedHists::StPicoDstarMixedHists(TString fileBaseName, bool reconstr
 
   if (mReconstructD){
     //D0 histogram
-    mh2InvariantMassVsPt        = new TH2F("mh2InvariantMassVsPt", "invariantMassVsPt;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
-    mh2InvariantMassVsPtLike    = new TH2F("mh2InvariantMassVsPtLike", "invariantMassVsPtLike;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
-    mh2InvariantMassVsPtTof     = new TH2F("mh2InvariantMassVsPtTof", "invariantMassVsPtTof;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
-    mh2InvariantMassVsPtTofLike = new TH2F("mh2InvariantMassVsPtTofLike", "invariantMassVsPtTofLike;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
-   mh3InvariantMassVsPtVsCent        = new TH3F("mh3InvariantMassVsPtVsCent", "invariantMassVsPtVsCent;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
-   mh3InvariantMassVsPtVsCentLike    = new TH3F("mh3InvariantMassVsPtVsCentLike", "invariantMassVsPtVsCentLike;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
-   mh3InvariantMassVsPtVsCentTof     = new TH3F("mh3InvariantMassVsPtVsCentTof", "invariantMassVsPtVsCentTof;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
-   mh3InvariantMassVsPtVsCentTofLike = new TH3F("mh3InvariantMassVsPtVsCentTofLike", "invariantMassVsPtVsCentTofLike;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
+    // mh2InvariantMassVsPt        = new TH2F("mh2InvariantMassVsPt", "invariantMassVsPt;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    // mh2InvariantMassVsPtLike    = new TH2F("mh2InvariantMassVsPtLike", "invariantMassVsPtLike;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    // mh2InvariantMassVsPtTof     = new TH2F("mh2InvariantMassVsPtTof", "invariantMassVsPtTof;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    // mh2InvariantMassVsPtTofLike = new TH2F("mh2InvariantMassVsPtTofLike", "invariantMassVsPtTofLike;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    mh3InvariantMassVsPtVsCent        = new TH3F("mh3InvariantMassVsPtVsCent", "invariantMassVsPtVsCent;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
+    mh3InvariantMassVsPtVsCentLike    = new TH3F("mh3InvariantMassVsPtVsCentLike", "invariantMassVsPtVsCentLike;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
+    mh3InvariantMassVsPtVsCentTof     = new TH3F("mh3InvariantMassVsPtVsCentTof", "invariantMassVsPtVsCentTof;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
+    mh3InvariantMassVsPtVsCentTofLike = new TH3F("mh3InvariantMassVsPtVsCentTofLike", "invariantMassVsPtVsCentTofLike;p_{T}(K#pi)(GeV/c);Cent;m_{K#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 50, 1.6, 2.1);
 
-   for (int icent=0;icent<9;icent++)
-   {
-     mh3InvariantMassVsPtVsrapidityD0[icent]= new TH3F(Form("mh3InvariantMassVsPtVsrapiditycent%d",icent),"InvariantMassVsPtVsrapidity;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2});rapidity",120, 0, 12, 100, -1, 1, 50, 1.6, 2.1);
-     mh3InvariantMassVsPtVsrapidityD0like[icent]= new TH3F(Form("mh3InvariantMassVsPtVsrapiditycent%dlike",icent),"InvariantMassVsPtVsrapidity;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2});rapidity",120, 0, 12, 100, -1, 1, 50, 1.6, 2.1);
-   }
+   // for (int icent=0;icent<9;icent++)
+   // {
+   //   mh3InvariantMassVsPtVsrapidityD0[icent]= new TH3F(Form("mh3InvariantMassVsPtVsrapiditycent%d",icent),"InvariantMassVsPtVsrapidity;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2});rapidity",120, 0, 12, 100, -1, 1, 50, 1.6, 2.1);
+   //   mh3InvariantMassVsPtVsrapidityD0like[icent]= new TH3F(Form("mh3InvariantMassVsPtVsrapiditycent%dlike",icent),"InvariantMassVsPtVsrapidity;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2});rapidity",120, 0, 12, 100, -1, 1, 50, 1.6, 2.1);
+   // }
 
    //Dstar histogram
-    mh2InvariantMassVsPtDstar        = new TH2F("mh2InvariantMassVsPtDstar", "invariantMassVsPt;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
-   mh2InvariantMassVsPtLikeDstar    = new TH2F("mh2InvariantMassVsPtLikeDstar", "invariantMassVsPtLike;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
-   mh3InvariantMassVsPtVsCentDstar        = new TH3F("mh3InvariantMassVsPtVsCentDstar", "invariantMassVsPtVsCent;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
-   mh3InvariantMassVsPtVsCentLikeDstar    = new TH3F("mh3InvariantMassVsPtVsCentLikeDstar", "invariantMassVsPtVsCentLike;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
-   mh2InvariantMassVsPtSBDstar    = new TH2F("mh2InvariantMassVsPtSBDstar", "invariantMassVsPtSB;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
-   mh3InvariantMassVsPtVsCentSBDstar    = new TH3F("mh3InvariantMassVsPtVsCentSBDstar", "invariantMassVsPtVsCentSB;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
+    // mh2InvariantMassVsPtDstar        = new TH2F("mh2InvariantMassVsPtDstar", "invariantMassVsPt;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
+    // mh2InvariantMassVsPtLikeDstar    = new TH2F("mh2InvariantMassVsPtLikeDstar", "invariantMassVsPtLike;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
+    // mh3InvariantMassVsPtVsCentDstar        = new TH3F("mh3InvariantMassVsPtVsCentDstar", "invariantMassVsPtVsCent;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
+    // mh3InvariantMassVsPtVsCentLikeDstar    = new TH3F("mh3InvariantMassVsPtVsCentLikeDstar", "invariantMassVsPtVsCentLike;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
+    // mh3MDstarVsD0PtVsCent    = new TH3F("mh3MDstarVsD0PtVsCent", "invariantMassVsD0PtVsCent;p_{T}(D^{0})(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
+    // mh3MDstarVsD0PtVsCentLike    = new TH3F("mh3MDstarVsD0PtVsCentLike", "invariantMassVsD0PtVsCentLike;p_{T}(D^{0})(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
+    // mh2InvariantMassVsPtSBDstar    = new TH2F("mh2InvariantMassVsPtSBDstar", "invariantMassVsPtSB;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
+    // mh3InvariantMassVsPtVsCentSBDstar    = new TH3F("mh3InvariantMassVsPtVsCentSBDstar", "invariantMassVsPtVsCentSB;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
 
-   mh2InvariantMassVsPtDstarD0  = new TH2F("mh2InvariantMassVsPtDstarD0", "invariantMassVsPt;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
-   mh2InvariantMassVsPtSBD0  = new TH2F("mh2InvariantMassVsPtSBD0", "invariantMassVsPt;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    // mh2InvariantMassVsPtDstarD0  = new TH2F("mh2InvariantMassVsPtDstarD0", "invariantMassVsPt;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
+    // mh2InvariantMassVsPtSBD0  = new TH2F("mh2InvariantMassVsPtSBD0", "invariantMassVsPt;p_{T}(K#pi)(GeV/c);m_{K#pi}(GeV/c^{2})", 120, 0, 12, 50, 1.6, 2.1);
   
      //Dstar mixed event
-     mh2InvariantMassVsPtDstarMixed = new TH2F("mh2InvariantMassVsPtDstarMixed", "invariantMassVsPtMixedEvent;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
-     mh3InvariantMassVsPtVsCentDstarMixed = new TH3F("mh3InvariantMassVsPtVsCentDstarMixedEvent", "invariantMassVsPtVsCentDstarMixedEvent;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
-     buffer = new TH3F("mh3eventinbufferVsVzVsCent", "eventinbufferVsPtVsCent;Vzbin;Cent;Counts", 12, -1, 11, 11, -1, 10, 6, 0, 6);
-    }  //reconstructD
+    // mh2InvariantMassVsPtDstarMixed = new TH2F("mh2InvariantMassVsPtDstarMixed", "invariantMassVsPtMixedEvent;p_{T}(K#pi#pi)(GeV/c);m_{K#pi#pi}-m_{K#pi}(GeV/c^{2})", 120, 0, 12, 90, 0.135, 0.18);
+    // mh3InvariantMassVsPtVsCentDstarMixed = new TH3F("mh3InvariantMassVsPtVsCentDstarMixedEvent", "invariantMassVsPtVsCentDstarMixedEvent;p_{T}(K#pi#pi)(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
+    // mh3MDstarVsD0PtVsCentDstarMixed = new TH3F("mh3MDstarVsD0PtVsCentDstarMixedEvent", "invariantMassVsD0PtVsCentDstarMixedEvent;p_{T}(D^{0})(GeV/c);Cent;m_{K#pi}-m_{K#pi#pi}(GeV/c^{2})", 120, 0, 12, 10, -1.5, 8.5, 90, 0.135, 0.18);
+    buffer = new TH3F("mh3eventinbufferVsVzVsCent", "eventinbufferVsPtVsCent;Vzbin;Cent;Counts", 12, -1, 11, 11, -1, 10, 6, 0, 6);
+    
+  //THn histograms
+  //D* pt, pi pt, centrality, D*-D0 mass, charge
+    int const dim = 6;
+    int nbins[dim] = {120,120,80,10,90,2};
+    double xmin[dim] = {0.,0.,0.,-1.5, 0.135,-1.5};
+    double xmax[dim] = {12.,12.,4., 8.5, 0.18,1.5};
+    mhnDstarD0PiMassCentCharge = new THnSparseF("mhnDstarD0PiMassCentCharge","mhnDstarD0PiMassCentCharge",dim,nbins,xmin,xmax);
+    mhnDstarD0PiMassCentChargeLK = new THnSparseF("mhnDstarD0PiMassCentChargeLK","mhnDstarD0PiMassCentChargeLK",dim,nbins,xmin,xmax);
+    mhnDstarD0PiMassCentChargeSB = new THnSparseF("mhnDstarD0PiMassCentChargeSB","mhnDstarD0PiMassCentChargeSB",dim,nbins,xmin,xmax);
+    mhnDstarD0PiMassCentChargeMix = new THnSparseF("mhnDstarD0PiMassCentChargeMix","mhnDstarD0PiMassCentChargeMix",dim,nbins,xmin,xmax);
+    mhnDstarD0PiMassCentChargeMixLK = new THnSparseF("mhnDstarD0PiMassCentChargeMixLK","mhnDstarD0PiMassCentChargeMixLK",dim,nbins,xmin,xmax);
+    mhnDstarD0PiMassCentCharge->Sumw2();
+    mhnDstarD0PiMassCentChargeLK->Sumw2();
+    mhnDstarD0PiMassCentChargeMix->Sumw2();
+    mhnDstarD0PiMassCentChargeMixLK->Sumw2();
+    mhnDstarD0PiMassCentChargeSB->Sumw2();
+  }  //reconstructD
 
    if (mFillSoftPionEff)
     {
@@ -314,20 +333,20 @@ void StPicoDstarMixedHists::addKaonPion(StKaonPion const* const kp, bool unlike,
 {
    if (unlike)
    {
-      if (tpc) mh2InvariantMassVsPt->Fill(kp->pt(), kp->m(), reweight);
-      if (tof) mh2InvariantMassVsPtTof->Fill(kp->pt(), kp->m(), reweight);
+      // if (tpc) mh2InvariantMassVsPt->Fill(kp->pt(), kp->m(), reweight);
+      // if (tof) mh2InvariantMassVsPtTof->Fill(kp->pt(), kp->m(), reweight);
       if (tpc) mh3InvariantMassVsPtVsCent->Fill(kp->pt(), centrality, kp->m(), reweight);
       if (tof) mh3InvariantMassVsPtVsCentTof->Fill(kp->pt(), centrality, kp->m(), reweight);
-      if (tof) mh3InvariantMassVsPtVsrapidityD0[centrality]->Fill(kp->pt(),kp->lorentzVector().rapidity(),kp->m(), reweight) ;
+  //    if (tof) mh3InvariantMassVsPtVsrapidityD0[centrality]->Fill(kp->pt(),kp->lorentzVector().rapidity(),kp->m(), reweight) ;
    }
    else
    {
-      if (tpc) mh2InvariantMassVsPtLike->Fill(kp->pt(), kp->m(), reweight);
-      if (tof) mh2InvariantMassVsPtTofLike->Fill(kp->pt(), kp->m(), reweight);
+      // if (tpc) mh2InvariantMassVsPtLike->Fill(kp->pt(), kp->m(), reweight);
+      // if (tof) mh2InvariantMassVsPtTofLike->Fill(kp->pt(), kp->m(), reweight);
       if (tpc) mh3InvariantMassVsPtVsCentLike->Fill(kp->pt(), centrality, kp->m(), reweight);
       if (tof) mh3InvariantMassVsPtVsCentTofLike->Fill(kp->pt(), centrality, kp->m(), reweight);
      
-     if (tof) mh3InvariantMassVsPtVsrapidityD0like[centrality]->Fill(kp->pt(),kp->lorentzVector().rapidity(), kp->m(),reweight) ;
+//     if (tof) mh3InvariantMassVsPtVsrapidityD0like[centrality]->Fill(kp->pt(),kp->lorentzVector().rapidity(), kp->m(),reweight) ;
    }
 }
 //-----------------------------------------------------------------------
@@ -481,36 +500,54 @@ void StPicoDstarMixedHists::addSoftPionQa(StThreeVectorF const& spMom,float spdc
 //---------------------------------------------------------------------
 void StPicoDstarMixedHists::addD0SoftPion(StD0Pion const* const d0p, StKaonPion const* const kp, bool unlike, int centrality, const double reweight)
 {
+   double y[6]={d0p->pt(),kp->pt() ,d0p->PilorentzVector().perp(),centrality,d0p->m()-kp->m(),d0p->charge()}; 
     if (unlike)
    {
-      mh2InvariantMassVsPtDstar->Fill(d0p->pt(), d0p->m()-kp->m(), reweight);
-      mh3InvariantMassVsPtVsCentDstar->Fill(d0p->pt(), centrality, d0p->m()-kp->m(), reweight);
+      // mh2InvariantMassVsPtDstar->Fill(d0p->pt(), d0p->m()-kp->m(), reweight);
+      // mh3InvariantMassVsPtVsCentDstar->Fill(d0p->pt(), centrality, d0p->m()-kp->m(), reweight);
 //to check if the D0 mass range is right;
-      mh2InvariantMassVsPtDstarD0->Fill(kp->pt(), kp->m(), reweight);
+      // mh2InvariantMassVsPtDstarD0->Fill(kp->pt(), kp->m(), reweight);
+      // mh3MDstarVsD0PtVsCent->Fill(kp->pt(), centrality , d0p->m()-kp->m(),reweight);
+      mhnDstarD0PiMassCentCharge->Fill(y,reweight);
    }
    else
    {
-      mh2InvariantMassVsPtLikeDstar->Fill(d0p->pt(), d0p->m()-kp->m(), reweight);
-      mh3InvariantMassVsPtVsCentLikeDstar->Fill(d0p->pt(), centrality, d0p->m()-kp->m(), reweight);
+      // mh2InvariantMassVsPtLikeDstar->Fill(d0p->pt(), d0p->m()-kp->m(), reweight);
+      // mh3InvariantMassVsPtVsCentLikeDstar->Fill(d0p->pt(), centrality, d0p->m()-kp->m(), reweight);
+      // mh3MDstarVsD0PtVsCentLike->Fill(kp->pt(), centrality , d0p->m()-kp->m(),reweight);
+      mhnDstarD0PiMassCentChargeLK->Fill(y,reweight);
    }
  
 }
-
+//---------------------------------------------------------------------------
+void StPicoDstarMixedHists::addDstarHists(StD0Pion const* const d0p, StKaonPion const* const kp, float const spi_pt, bool unlike, int centrality, const double reweight)
+{
+//left to add ... 
+}
+//
 void StPicoDstarMixedHists::addSideBandBackground(StD0Pion const* const d0p, StKaonPion const* const kp,bool unlike, int centrality, const double reweight)
 {
-      if (unlike){
-        mh2InvariantMassVsPtSBD0->Fill(kp->pt(), kp->m(), reweight);
-        mh2InvariantMassVsPtSBDstar->Fill(d0p->pt(), d0p->m()-kp->m(), reweight);
-      mh3InvariantMassVsPtVsCentSBDstar->Fill(d0p->pt(), centrality, d0p->m()-kp->m(), reweight);
-      }
+   double y[6]={d0p->pt(),d0p->D0lorentzVector().perp(),d0p->PilorentzVector().perp(),centrality,d0p->m()-kp->m(),d0p->charge()}; 
+   if (unlike){
+     // mh2InvariantMassVsPtSBD0->Fill(kp->pt(), kp->m(), reweight);
+     // mh2InvariantMassVsPtSBDstar->Fill(d0p->pt(), d0p->m()-kp->m(), reweight);
+     // mh3InvariantMassVsPtVsCentSBDstar->Fill(d0p->pt(), centrality, d0p->m()-kp->m(), reweight);
+     mhnDstarD0PiMassCentChargeSB->Fill(y,reweight);
+   }
 }
 
 void StPicoDstarMixedHists::addMixedEventBackground(StMixedD0Pion const & mixD0Pion,bool unlike,int centrality,const double reweight)
 {
+    double y[6]={mixD0Pion.pt(), mixD0Pion.D0lorentzVector().perp(), mixD0Pion.PilorentzVector().perp(),centrality,mixD0Pion.deltaM(),mixD0Pion.charge()};
     if (unlike && mixD0Pion.deltaM()<0.2 && mixD0Pion.deltaM()>0.1){
-      mh2InvariantMassVsPtDstarMixed->Fill(mixD0Pion.pt(),mixD0Pion.deltaM(),reweight);
-      mh3InvariantMassVsPtVsCentDstarMixed->Fill(mixD0Pion.pt(),centrality, mixD0Pion.deltaM(),reweight);
-  }
+      // mh2InvariantMassVsPtDstarMixed->Fill(mixD0Pion.pt(),mixD0Pion.deltaM(),reweight);
+      // mh3InvariantMassVsPtVsCentDstarMixed->Fill(mixD0Pion.pt(),centrality, mixD0Pion.deltaM(),reweight);
+      // mh3MDstarVsD0PtVsCentDstarMixed->Fill(mixD0Pion.D0lorentzVector().perp(), centrality, mixD0Pion.deltaM(),reweight);
+      mhnDstarD0PiMassCentChargeMix->Fill(y, reweight);
+    }
+    if ((!unlike)&&mixD0Pion.deltaM()<0.2&&mixD0Pion.deltaM()>0.1){
+      mhnDstarD0PiMassCentChargeMixLK->Fill(y,reweight); 
+    }
 }
 
 void StPicoDstarMixedHists::addeventsinbuffer(const int vzbin,const int centrality,const int size)
@@ -535,33 +572,44 @@ void StPicoDstarMixedHists::closeFile()
 
    if (mReconstructD){
    //D0
-   mh2InvariantMassVsPt->Write();
-   mh2InvariantMassVsPtLike->Write();
-   mh2InvariantMassVsPtTof->Write();
-   mh2InvariantMassVsPtTofLike->Write();
+   // mh2InvariantMassVsPt->Write();
+   // mh2InvariantMassVsPtLike->Write();
+   // mh2InvariantMassVsPtTof->Write();
+   // mh2InvariantMassVsPtTofLike->Write();
    mh3InvariantMassVsPtVsCent->Write();
    mh3InvariantMassVsPtVsCentLike->Write();
    mh3InvariantMassVsPtVsCentTof->Write();
    mh3InvariantMassVsPtVsCentTofLike->Write();
-   for (int icent=0;icent<9;icent++)
-   {
-     mh3InvariantMassVsPtVsrapidityD0[icent]->Write();
-     mh3InvariantMassVsPtVsrapidityD0like[icent]->Write();
-   }
+ 
+   // for (int icent=0;icent<9;icent++)
+   // {
+   //   mh3InvariantMassVsPtVsrapidityD0[icent]->Write();
+   //   mh3InvariantMassVsPtVsrapidityD0like[icent]->Write();
+   // }
    //Dstar
-   mh2InvariantMassVsPtDstar->Write();
-   mh2InvariantMassVsPtSBDstar->Write();
-   mh2InvariantMassVsPtLikeDstar->Write();
-   mh3InvariantMassVsPtVsCentDstar->Write();
-   mh3InvariantMassVsPtVsCentSBDstar->Write();
-   mh3InvariantMassVsPtVsCentLikeDstar->Write();
-   mh2InvariantMassVsPtSBD0->Write();
-   mh2InvariantMassVsPtDstarD0->Write();
+   // mh2InvariantMassVsPtDstar->Write();
+   // mh2InvariantMassVsPtSBDstar->Write();
+   // mh2InvariantMassVsPtLikeDstar->Write();
+   // mh3InvariantMassVsPtVsCentDstar->Write();
+   // mh3InvariantMassVsPtVsCentSBDstar->Write();
+   // mh3InvariantMassVsPtVsCentLikeDstar->Write();
+   // mh2InvariantMassVsPtSBD0->Write();
+   // mh2InvariantMassVsPtDstarD0->Write();
+   // mh3MDstarVsD0PtVsCent->Write();
+   // mh3MDstarVsD0PtVsCentLike->Write();
    //Dstar mixed event
-   mh2InvariantMassVsPtDstarMixed->Write();
-   mh3InvariantMassVsPtVsCentDstarMixed->Write();
+   // mh2InvariantMassVsPtDstarMixed->Write();
+   // mh3InvariantMassVsPtVsCentDstarMixed->Write();
+   // mh3MDstarVsD0PtVsCentDstarMixed->Write();
    buffer->Write();
-    }  //resconstructD
+   
+   //THn histograms
+   mhnDstarD0PiMassCentCharge->Write();
+   mhnDstarD0PiMassCentChargeLK->Write();
+   mhnDstarD0PiMassCentChargeMix->Write();
+   mhnDstarD0PiMassCentChargeMixLK->Write();
+   mhnDstarD0PiMassCentChargeSB->Write();
+   }  //resconstructD
       
 //spion Qa
     if (mSoftPionQa)
@@ -606,7 +654,7 @@ void StPicoDstarMixedHists::closeFile()
    if (!mFillQaHists)
    {
       mOutFile->Close();
-      mOutFile->Delete();
+      mOutFile->Delete("*;*");
       return;
    }
 

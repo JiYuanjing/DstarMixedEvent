@@ -41,6 +41,7 @@ class StPicoDstarMixedHists
   void addSoftPionEff(StThreeVectorF const& spMom, bool tpcpion, bool tofavailable, bool tofPion, double diffBeta, double nSigmaPion, double beta_pi, int centrality, const double reweight, short const charge);
   void addSoftPionQa(StThreeVectorF const& spMom,float spdca, int centrality, const double reweight, short int charge);
   void addD0SoftPion(StD0Pion const* const d0p, StKaonPion const* const kp, bool unlike,  int centrality, const double reweight);
+void addDstarHists(StD0Pion const* const d0p, StKaonPion const* const kp, float const spi_pt, bool unlike, int centrality, const double reweight);
   void addSideBandBackground(StD0Pion const* const d0p, StKaonPion const* const k,bool unlike, int centrality, const double reweight);
   void addMixedEventBackground(StMixedD0Pion const & mixD0Pion,bool unlike, int centrality,const double reweight);
 //
@@ -142,6 +143,8 @@ private:
    TH3F* mh3InvariantMassVsPtVsCentLikeDstar;
    TH2F* mh2InvariantMassVsPtDstarD0;
    TH2F* mh2InvariantMassVsPtSBD0;
+   TH3F* mh3MDstarVsD0PtVsCent;
+   TH3F* mh3MDstarVsD0PtVsCentLike;
 //Dstar softpion efficiency
    TH3F* mh3SoftPionDcaVsPtVsCent;
    TH3F* mh3SoftPionPtVsEtaVsPhiTPC[2][9];
@@ -154,7 +157,13 @@ private:
 //Dstar mixed event 
    TH2F* mh2InvariantMassVsPtDstarMixed;
    TH3F* mh3InvariantMassVsPtVsCentDstarMixed;
+   TH3F* mh3MDstarVsD0PtVsCentDstarMixed;
    TH3F* buffer;
+   THnSparseF* mhnDstarD0PiMassCentCharge;
+   THnSparseF* mhnDstarD0PiMassCentChargeLK;
+   THnSparseF* mhnDstarD0PiMassCentChargeMix;
+   THnSparseF* mhnDstarD0PiMassCentChargeMixLK;
+   THnSparseF* mhnDstarD0PiMassCentChargeSB;
 };
 
 #endif

@@ -176,7 +176,7 @@ namespace anaCuts
 //------------------------------------------------------------
 //D_star cut 
 float const mD0_max=1.90;
-float const mD0_.part1min=1.83;
+float const mD0_min=1.83;
 float const cosThetaStar=0.8;
 float const ptD0_min=7;
 float const ptSoftPion_max=20;

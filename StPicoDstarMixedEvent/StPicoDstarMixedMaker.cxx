@@ -316,17 +316,17 @@ Int_t StPicoDstarMixedMaker::Make()
          {
           for (unsigned short iTrack = 0; iTrack<nTracks; ++iTrack)
           {
-             StPicoTrack* trk = picoDst->track(iTrack);
-             if (!trk) continue;
+            StPicoTrack* trk = picoDst->track(iTrack);
+            if (!trk) continue;
 
-             StThreeVectorF spMom = trk->gMom(pVtx, picoDst->event()->bField());
-             float spDca = float((trk->helix()).geometricSignedDistance(pVtx));
-             if (!isGoodSoftPionTrack(trk, spMom, spDca)) continue;
-             
-             double diffInvBeta = -999;
-             double nSigmaPion = -999;
-             double nSigmaKaon = -999;
-             double nSigmaProton = -999;
+            StThreeVectorF spMom = trk->gMom(pVtx, picoDst->event()->bField());
+            float spDca = float((trk->helix()).geometricSignedDistance(pVtx));
+            if (!isGoodSoftPionTrack(trk, spMom, spDca)) continue;
+            
+            double diffInvBeta = -999;
+            double nSigmaPion = -999;
+            double nSigmaKaon = -999;
+            double nSigmaProton = -999;
             //softpion PID 
             nSigmaPion = trk->nSigmaPion();
             nSigmaKaon = trk->nSigmaKaon();
@@ -346,20 +346,20 @@ Int_t StPicoDstarMixedMaker::Make()
             float beta_mu = -999;
             float invbeta = -999;
             if (spiTofAvailable){
-                 invbeta = 1.0/spiBeta;
-                 double ptot = trk->gMom(pVtx, mPicoDstMaker->picoDst()->event()->bField()).mag();
+               invbeta = 1.0/spiBeta;
+               double ptot = trk->gMom(pVtx, mPicoDstMaker->picoDst()->event()->bField()).mag();
                //  beta_pi = ptot / sqrt(ptot * ptot + M_PION_PLUS * M_PION_PLUS);
-                 beta_pi = ptot / sqrt(ptot * ptot + M_PION_PLUS * M_PION_PLUS);
-                 beta_mu = ptot / sqrt(ptot * ptot + M_MUON_PLUS * M_MUON_PLUS);
-                 beta_k = ptot / sqrt(ptot * ptot + M_KAON_PLUS * M_KAON_PLUS);
-                 beta_pr = ptot / sqrt(ptot * ptot + M_PROTON * M_PROTON);
-                 diffInvBeta = 1.0 / spiBeta - 1.0 / beta_pi;
-                 nottofkaon = fabs(1.0 / spiBeta - 1.0 / beta_k)>0.04;
-                 nottofproton = fabs(1.0 / spiBeta - 1.0 / beta_pr)>0.04;
-                 tofPion = fabs(diffInvBeta) < 0.02;
-                 strictTof = fabs(diffInvBeta) < 0.02 && nottofproton && nottofkaon;
-//               strictTof = strictTof && fabs(nSigmaKaon)>4 && fabs(nSigmaProton)>4;
-//               strictTPC = strictTPC && nottofproton && nottofkaon; //hybred
+               beta_pi = ptot / sqrt(ptot * ptot + M_PION_PLUS * M_PION_PLUS);
+               beta_mu = ptot / sqrt(ptot * ptot + M_MUON_PLUS * M_MUON_PLUS);
+               beta_k = ptot / sqrt(ptot * ptot + M_KAON_PLUS * M_KAON_PLUS);
+               beta_pr = ptot / sqrt(ptot * ptot + M_PROTON * M_PROTON);
+               diffInvBeta = 1.0 / spiBeta - 1.0 / beta_pi;
+               nottofkaon = fabs(1.0 / spiBeta - 1.0 / beta_k)>0.04;
+               nottofproton = fabs(1.0 / spiBeta - 1.0 / beta_pr)>0.04;
+               tofPion = fabs(diffInvBeta) < 0.02;
+               strictTof = fabs(diffInvBeta) < 0.02 && nottofproton && nottofkaon;
+//             strictTof = strictTof && fabs(nSigmaKaon)>4 && fabs(nSigmaProton)>4;
+//             strictTPC = strictTPC && nottofproton && nottofkaon; //hybred
             }
             mHists->addSoftPionEff(spMom,strictTPC && nottofkaon && nottofproton,spiTofAvailable, strictTof && fabs(nSigmaKaon)>4 && fabs(nSigmaProton)>4, diffInvBeta, nSigmaPion, invbeta, centrality, reweight, trk->charge());
           }//itrack
